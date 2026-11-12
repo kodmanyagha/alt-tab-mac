@@ -1,0 +1,57 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# On a `v<version>` tag push (e.g. `git tag v0.2.0 && git push origin v0.2.0`):
+# runs the tests, builds the zip and dmg, creates a GitHub Release and attaches
+# the Homebrew cask. The tag must match the version in Cargo.toml.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Check tag matches Cargo version
+        run: |
+          version="$(grep -m1 '^version' Cargo.toml | cut -d'"' -f2)"
+          if [ "v${version}" != "${GITHUB_REF_NAME}" ]; then
+            echo "tag ${GITHUB_REF_NAME} does not match Cargo.toml version ${version}" >&2
+            exit 1
+          fi
+
+      - name: Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustup target add aarch64-apple-darwin x86_64-apple-darwin
+
+      - name: Tests
+        run: cargo test
+
+      - name: Packages (zip, dmg, SHA256SUMS)
+        run: scripts/release.sh
+
+      - name: Homebrew cask
+        run: scripts/update-cask.sh "${GITHUB_REPOSITORY}"
+
+      - name: GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          assets=(dist/*.zip dist/*.dmg dist/SHA256SUMS dist/alt-tab-mac.rb)
+          if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            echo "release ${GITHUB_REF_NAME} already exists, replacing its assets"
+            gh release upload "${GITHUB_REF_NAME}" "${assets[@]}" --clobber
+            gh release edit "${GITHUB_REF_NAME}" --draft=false
+          else
+            gh release create "${GITHUB_REF_NAME}" "${assets[@]}" \
+              --title "alt-tab-mac ${GITHUB_REF_NAME}" \
+              --generate-notes
+          fi

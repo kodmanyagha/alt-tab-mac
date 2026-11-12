@@ -1,0 +1,22 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+pub mod actions;
+pub mod appearance;
+pub mod filter;
+pub mod geometry;
+pub mod grid_nav;
+pub mod hotkey;
+pub mod input;
+pub mod key_names;
+pub mod keys;
+pub mod model;
+pub mod mru;
+pub mod panel_screen;
+pub mod scope;
+pub mod screens;
+pub mod sort;
+pub mod spaces;
+pub mod style;
+pub mod switcher;
+pub mod system_shortcuts;
+pub mod window_kind;

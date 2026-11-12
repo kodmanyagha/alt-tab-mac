@@ -1,0 +1,42 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Homebrew cask template. Fill it in with: scripts/update-cask.sh <github-user/repo>
+# Copy the output (dist/alt-tab-mac.rb) to your tap repo (e.g. <user>/homebrew-tap,
+# Casks/alt-tab-mac.rb). Install with:
+#   brew install --cask <user>/tap/alt-tab-mac
+
+cask "alt-tab-mac" do
+  version "__VERSION__"
+  sha256 "__SHA256__"
+
+  url "https://github.com/__REPO__/releases/download/v#{version}/alt-tab-mac-#{version}-universal.zip"
+  name "alt-tab-mac"
+  desc "Fast, window-based app switcher (Alt-Tab for macOS)"
+  homepage "https://github.com/__REPO__"
+
+  livecheck do
+    url :url
+    strategy :github_latest
+  end
+
+  depends_on macos: ">= :big_sur"
+
+  app "alt-tab-mac.app"
+
+  uninstall quit: "__BUNDLE_ID__"
+
+  zap trash: [
+    "~/Library/Application Support/alt-tab-mac",
+    "~/Library/LaunchAgents/__BUNDLE_ID__.plist",
+    "~/Library/Logs/alt-tab-mac.log",
+  ]
+
+  caveats <<~EOS
+    alt-tab-mac is not notarized by Apple. If macOS refuses to open it, run:
+      xattr -dr com.apple.quarantine "#{appdir}/alt-tab-mac.app"
+    or right-click the app in Finder and choose "Open".
+
+    Then grant Accessibility permission (System Settings → Privacy & Security
+    → Accessibility). Window previews also need Screen Recording permission.
+  EOS
+end

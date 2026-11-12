@@ -1,0 +1,90 @@
+[package]
+name = "alt-tab-mac"
+version = "0.1.0"
+edition = "2024"
+license = "GPL-3.0-or-later"
+description = "Fast, window-based app switcher for macOS"
+
+[dependencies]
+block2 = "=0.6.2"
+dispatch2 = "=0.3.1"
+objc2 = "=0.6.5"
+objc2-app-kit = { version = "=0.3.2", default-features = false, features = [
+    "std",
+    "libc",
+    "objc2-core-foundation",
+    "objc2-core-graphics",
+    "objc2-quartz-core",
+    "NSApplication",
+    "NSRunningApplication",
+    "NSWorkspace",
+    "NSScreen",
+    "NSPanel",
+    "NSWindow",
+    "NSView",
+    "NSVisualEffectView",
+    "NSImage",
+    "NSImageView",
+    "NSTextField",
+    "NSControl",
+    "NSButton",
+    "NSPopUpButton",
+    "NSMenu",
+    "NSMenuItem",
+    "NSStatusBar",
+    "NSStatusItem",
+    "NSStatusBarButton",
+    "NSColor",
+    "NSFont",
+    "NSFontManager",
+    "NSStackView",
+    "NSScrollView",
+    "NSClipView",
+    "NSTabView",
+    "NSTabViewItem",
+    "NSTrackingArea",
+    "NSEvent",
+    "NSResponder",
+    "NSAppearance",
+    "NSLayoutAnchor",
+    "NSLayoutConstraint",
+    "NSBitmapImageRep",
+    "NSImageRep",
+    "NSPasteboard",
+    "NSCell",
+    "NSText",
+    "NSGraphics",
+    "NSUserInterfaceLayout",
+    "NSParagraphStyle",
+    "NSFontDescriptor",
+] }
+objc2-core-foundation = "=0.3.2"
+objc2-core-graphics = { version = "=0.3.2", default-features = false, features = [
+    "std",
+    "CGImage",
+    "CGBase",
+    "CGColor",
+    "CGColorSpace",
+] }
+objc2-foundation = "=0.3.2"
+objc2-quartz-core = { version = "=0.3.2", default-features = false, features = [
+    "std",
+    "objc2-core-graphics",
+    "objc2-core-foundation",
+    "CALayer",
+    "CABase",
+    "CATransform3D",
+    "CAMediaTiming",
+] }
+parking_lot = "=0.13.0"
+serde = { version = "=1.0.229", features = ["derive"] }
+toml = "=1.2.1"
+tracing = "=0.1.44"
+tracing-appender = "=0.2.5"
+tracing-subscriber = { version = "=0.3.23", default-features = false, features = ["fmt", "std"] }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true

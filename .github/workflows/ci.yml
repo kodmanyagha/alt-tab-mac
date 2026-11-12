@@ -1,0 +1,59 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# On every push and pull request: formatting, clippy, tests and a universal .app
+# build, uploaded as an artifact.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal --component rustfmt --component clippy
+          rustup default stable
+          rustup target add aarch64-apple-darwin x86_64-apple-darwin
+
+      - uses: actions/cache@v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: cargo-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
+          restore-keys: cargo-${{ runner.os }}-
+
+      - name: Formatting
+        run: cargo fmt --check
+
+      - name: Clippy
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Tests
+        run: cargo test
+
+      - name: Universal .app
+        run: SIGN_IDENTITY=- scripts/bundle.sh
+
+      - name: Zip the .app
+        run: ditto -c -k --sequesterRsrc --keepParent target/alt-tab-mac.app alt-tab-mac.zip
+
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: alt-tab-mac-${{ github.sha }}
+          path: alt-tab-mac.zip
+          retention-days: 14
